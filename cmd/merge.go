@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
-	"os"
 
 	"github.com/awslabs/goformation"
 	"github.com/spf13/cobra"
@@ -71,55 +69,51 @@ func getParamsFromTemplate(f string) (map[string]interface{}, error) {
 }
 
 func mergeRun(cmd *cobra.Command, args []string) {
-	var res []param
+	// var res []param
+	fmt.Println(paramFilesArray)
+	fmt.Println(cfTemplate)
 
-	// Open a template from file (can be JSON or YAML)
-	template, err := goformation.Open(string(cfTemplate))
+	// for paramFile := range paramFilesArray {
+	// 	paramsFromFile, err := getParamsFromFile(string(paramFile))
+	// 	if err != nil {
+	// 		panic(err)
+	// 	}
+	// 	log.Println(paramsFromFile)
+
+	paramsFromTemplate, err := getParamsFromTemplate(string(cfTemplate))
 	if err != nil {
 		panic(err)
 	}
-
-	for paramFile := range paramFilesArray {
-		paramsFromFile, err := getParamsFromFile(string(paramFile))
-		if err != nil {
-			panic(err)
-		}
-		log.Println(paramsFromFile)
-
-		for name, properties := range template.Parameters {
-			var value string
-			p, _ := properties.(map[string]interface{})
-
-			if defaultValString, ok := p["Default"].(string); ok {
-				value = defaultValString
-			}
-			if fileValString, ok := thisParameterKeyHasValue(paramsFromFile, name); ok {
-				value = fileValString
-			}
-			if envValString, ok := os.LookupEnv(name); ok {
-				value = envValString
-			}
-			// switch !nil {
-			// case envValString, _ := os.LookupEnv(name):
-			// 	value = envValString
-			// case fileValString, ok := thisParameterKeyHasValue(paramsFromFile, name) && ok:
-			// }
-
-			if len(value) > 0 {
-				param := param{
-					ParameterKey:   name,
-					ParameterValue: value,
-				}
-				res = append(res, param)
-			}
-		}
+	for p := range paramsFromTemplate {
+		//var value string
+		fmt.Println(p)
 	}
+	// 		// p, _ := properties.(map[string]interface{})
 
-	resj, err := json.Marshal(&res)
-	if err != nil {
-		panic(err)
-	}
+	// 		// if defaultValString, ok := p["Default"].(string); ok {
+	// 		// 	value = defaultValString
+	// 		// }
+	// 		// if fileValString, ok := thisParameterKeyHasValue(paramsFromFile, name); ok {
+	// 		// 	value = fileValString
+	// 		// }
+	// 		// if envValString, ok := os.LookupEnv(name); ok {
+	// 		// 	value = envValString
+	// 		// }
+	// 		// if len(value) > 0 {
+	// 		// 	param := param{
+	// 		// 		ParameterKey:   name,
+	// 		// 		ParameterValue: value,
+	// 		// 	}
+	// 		// 	res = append(res, param)
+	// 		// }
+	// 	}
+	// }
 
-	//fmt.Fprintf("%s", resj)
-	fmt.Printf("%s", resj)
+	// resj, err := json.Marshal(&res)
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	// //fmt.Fprintf("%s", resj)
+	// fmt.Printf("%s", resj)
 }

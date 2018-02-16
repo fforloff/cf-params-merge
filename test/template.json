@@ -7,7 +7,7 @@
     },
     "Parameter2": {
       "Type": "String",
-      "Default": "Aaaaaa"
+      "Default": "string-value"
     },
     "Parameter3": {
       "Type": "Number",

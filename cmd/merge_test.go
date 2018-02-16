@@ -38,9 +38,9 @@ var _ = Describe("Merge", func() {
 		It("shall get parameters from a CloudFormation template", func() {
 			p, err := getParamsFromTemplate("../test/template.json")
 			Expect(err).To(BeNil())
-			paramType := p["Parameter1"].(map[string]interface{})
-			paramTypeVal := paramType["Type"].(string)
-			Expect(paramTypeVal).To(Equal("String"))
+			Expect(p["Parameter1"].(map[string]interface{})["Type"].(string)).To(Equal("String"))
+			Expect(p["Parameter2"].(map[string]interface{})["Default"].(string)).To(Equal("string-value"))
+			Expect(p["Parameter3"].(map[string]interface{})["Default"].(float64)).To(Equal(float64(42)))
 		})
 	})
 })
