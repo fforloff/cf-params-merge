@@ -35,17 +35,17 @@ func init() {
 
 }
 
-type Param struct {
+type param struct {
 	ParameterKey   string `json:"ParameterKey"`
 	ParameterValue string `json:"ParameterValue"`
 }
 
-func getParamsFromFile(f string) ([]Param, error) {
+func getParamsFromFile(f string) ([]param, error) {
 	raw, err := ioutil.ReadFile(f)
 	if err != nil {
 		return nil, err
 	}
-	var p []Param
+	var p []param
 	err = json.Unmarshal(raw, &p)
 	if err != nil {
 		return nil, err
@@ -53,7 +53,7 @@ func getParamsFromFile(f string) ([]Param, error) {
 	return p, nil
 }
 
-func thisParameterKeyHasValue(p []Param, param string) (string, bool) {
+func thisParameterKeyHasValue(p []param, param string) (string, bool) {
 	for _, v := range p {
 		if v.ParameterKey == param {
 			return v.ParameterValue, true
@@ -62,11 +62,16 @@ func thisParameterKeyHasValue(p []Param, param string) (string, bool) {
 	return "", false
 }
 
-func mergeRun(cmd *cobra.Command, args []string) {
-	// fmt.Println(cfTemplate)
-	// fmt.Println(paramFilesArray)
+func getParamsFromTemplate(f string) (map[string]interface{}, error) {
+	t, err := goformation.Open(string(f))
+	if err != nil {
+		return nil, err
+	}
+	return t.Parameters, nil
+}
 
-	var res []Param
+func mergeRun(cmd *cobra.Command, args []string) {
+	var res []param
 
 	// Open a template from file (can be JSON or YAML)
 	template, err := goformation.Open(string(cfTemplate))
@@ -74,8 +79,8 @@ func mergeRun(cmd *cobra.Command, args []string) {
 		panic(err)
 	}
 
-	for param_file := range paramFilesArray {
-		paramsFromFile, err := getParamsFromFile(string(param_file))
+	for paramFile := range paramFilesArray {
+		paramsFromFile, err := getParamsFromFile(string(paramFile))
 		if err != nil {
 			panic(err)
 		}
@@ -85,17 +90,23 @@ func mergeRun(cmd *cobra.Command, args []string) {
 			var value string
 			p, _ := properties.(map[string]interface{})
 
-			if default_val_string, ok := p["Default"].(string); ok {
-				value = default_val_string
+			if defaultValString, ok := p["Default"].(string); ok {
+				value = defaultValString
 			}
-			if file_val_string, ok := thisParameterKeyHasValue(paramsFromFile, name); ok {
-				value = file_val_string
+			if fileValString, ok := thisParameterKeyHasValue(paramsFromFile, name); ok {
+				value = fileValString
 			}
-			if env_val_string, ok := os.LookupEnv(name); ok {
-				value = env_val_string
+			if envValString, ok := os.LookupEnv(name); ok {
+				value = envValString
 			}
+			// switch !nil {
+			// case envValString, _ := os.LookupEnv(name):
+			// 	value = envValString
+			// case fileValString, ok := thisParameterKeyHasValue(paramsFromFile, name) && ok:
+			// }
+
 			if len(value) > 0 {
-				param := Param{
+				param := param{
 					ParameterKey:   name,
 					ParameterValue: value,
 				}
