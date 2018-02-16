@@ -2,12 +2,16 @@
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "A sample Cloudformation template",
   "Parameters": {
-    "ParameterWithoutDefValue": {
+    "Parameter1": {
       "Type": "String"
     },
-    "ParameterWithDefaultValue": {
+    "Parameter2": {
       "Type": "String",
       "Default": "Aaaaaa"
+    },
+    "Parameter3": {
+      "Type": "Number",
+      "Default": 42
     }
   }
 }

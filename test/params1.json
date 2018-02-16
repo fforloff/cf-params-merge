@@ -1,0 +1,10 @@
+[
+    {
+      "ParameterKey": "StackName",
+      "ParameterValue": "blahStack"
+    },
+    {
+      "ParameterKey": "Environment",
+      "ParameterValue": "dev"
+    }
+  ]

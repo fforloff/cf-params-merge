@@ -21,6 +21,7 @@ environment variables and merge them into a single parameters JSON`,
 	},
 }
 
+//Execute ...
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
@@ -31,6 +32,7 @@ func Execute() {
 func init() {
 }
 
+//CheckRequiredFlags function checks if required flags have a value
 func CheckRequiredFlags(flags *pflag.FlagSet) error {
 	requiredError := false
 	flagName := ""
