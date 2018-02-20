@@ -1,10 +1,10 @@
 [
     {
-      "ParameterKey": "StackName",
-      "ParameterValue": "blahStack"
+      "ParameterKey": "Parameter1",
+      "ParameterValue": "parameter 1 value"
     },
     {
-      "ParameterKey": "Environment",
-      "ParameterValue": "dev"
+      "ParameterKey": "Parameter3",
+      "ParameterValue": "43"
     }
   ]

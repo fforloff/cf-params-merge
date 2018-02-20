@@ -1,5 +1,6 @@
 *.test
 *.out
 .idea
+cfmingle
 .DS_Store
 vendor/
