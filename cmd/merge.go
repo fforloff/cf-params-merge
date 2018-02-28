@@ -3,11 +3,8 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"os"
-	"strconv"
 
-	"github.com/awslabs/goformation"
+	"github.com/fforloff/cfmingle/merge"
 	"github.com/spf13/cobra"
 )
 
@@ -35,133 +32,25 @@ func init() {
 
 }
 
-type param struct {
-	ParameterKey     string `json:"ParameterKey"`
-	ParameterValue   string `json:"ParameterValue,omitempty"`
-	UsePreviousValue bool   `json:"UsePreviousValue,omitempty"`
-	ResolvedValue    string `json:"ResolvedValue,omitempty"`
-}
-
-func thisParameterKeyHasValue(p []param, name string) (string, bool) {
-	for _, v := range p {
-		if v.ParameterKey == name {
-			return v.ParameterValue, true
-		}
-	}
-	return "", false
-}
-
-func getParamsFromTemplate(f string) (map[string]interface{}, error) {
-	t, err := goformation.Open(string(f))
-	if err != nil {
-		return nil, err
-	}
-	return t.Parameters, nil
-}
-
-func getTemplateParamValue(i interface{}) string {
-	dv := ""
-	if vv, ok := i.(map[string]interface{}); ok {
-		if v, ok := vv["Default"]; ok {
-			switch vTyped := v.(type) {
-			case string:
-				dv = vTyped
-			case int:
-				dv = strconv.Itoa(vTyped)
-			case int64:
-				dv = strconv.FormatInt(vTyped, 10)
-			case float64:
-				dv = strconv.FormatFloat(vTyped, 'f', -1, 64)
-			case bool:
-				if vTyped {
-					dv = "true"
-				} else {
-					dv = "false"
-				}
-			default:
-				// need better error handling here
-				os.Exit(1)
-			}
-		}
-	}
-	return dv
-}
-
-func getParamsFromFile(f string) ([]param, error) {
-	raw, err := ioutil.ReadFile(f)
-	if err != nil {
-		return nil, err
-	}
-	var p []param
-	err = json.Unmarshal(raw, &p)
-	if err != nil {
-		return nil, err
-	}
-	return p, nil
-}
-
-func reverseSlice(s []string) {
-	for i, j := 0, len(s)-1; i < j; i, j = i+1, j-1 {
-		s[i], s[j] = s[j], s[i]
-	}
-}
-
-func getParamsFromFiles(fs []string) ([][]param, error) {
-	var res [][]param
-	reverseSlice(fs)
-	for _, f := range fs {
-		pp, err := getParamsFromFile(f)
-		if err != nil {
-			return res, err
-		}
-		res = append(res, pp)
-	}
-	return res, nil
-}
-
-func getParamValueFromFiles(pp [][]param, n string) string {
-	var (
-		v  string
-		ok bool
-	)
-	for _, p := range pp {
-		if v, ok = thisParameterKeyHasValue(p, n); ok {
-			return v
-		}
-	}
-	return ""
-}
-
-func getParamValueFromEnv(n string) string {
-	var (
-		v  string
-		ok bool
-	)
-	if v, ok = os.LookupEnv(n); ok {
-		return v
-	}
-	return ""
-}
-
 func mergeRun(cmd *cobra.Command, args []string) {
 
 	fmt.Println(paramFilesArray)
 	fmt.Println(cfTemplate)
 	var (
-		res                []param
+		res                []merge.Param
 		paramValue         string
 		pv                 string
 		err                error
 		paramsFromTemplate map[string]interface{}
-		paramsFromFiles    [][]param
+		paramsFromFiles    [][]merge.Param
 	)
 
-	paramsFromTemplate, err = getParamsFromTemplate(string(cfTemplate))
+	paramsFromTemplate, err = merge.GetParamsFromTemplate(string(cfTemplate))
 	if err != nil {
 		panic(err)
 	}
 	if len(paramFilesArray) > 0 {
-		paramsFromFiles, err = getParamsFromFiles(paramFilesArray)
+		paramsFromFiles, err = merge.GetParamsFromFiles(paramFilesArray)
 		if err != nil {
 			panic(err)
 		}
@@ -169,23 +58,23 @@ func mergeRun(cmd *cobra.Command, args []string) {
 
 	for name, valueInterface := range paramsFromTemplate {
 
-		pv = getTemplateParamValue(valueInterface)
+		pv = merge.GetTemplateParamValue(valueInterface)
 		if len(pv) > 0 {
 			paramValue = pv
 		}
 
-		pv = getParamValueFromFiles(paramsFromFiles, name)
+		pv = merge.GetParamValueFromFiles(paramsFromFiles, name)
 		if len(pv) > 0 {
 			paramValue = pv
 		}
 
-		pv = getParamValueFromEnv(name)
+		pv = merge.GetParamValueFromEnv(name)
 		if len(pv) > 0 {
 			paramValue = pv
 		}
 
 		if len(paramValue) > 0 {
-			param := param{
+			param := merge.Param{
 				ParameterKey:   name,
 				ParameterValue: paramValue,
 			}
