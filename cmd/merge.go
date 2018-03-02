@@ -34,53 +34,8 @@ func init() {
 
 func mergeRun(cmd *cobra.Command, args []string) {
 
-	fmt.Println(paramFilesArray)
-	fmt.Println(cfTemplate)
-	var (
-		res                []merge.Param
-		paramValue         string
-		pv                 string
-		err                error
-		paramsFromTemplate map[string]interface{}
-		paramsFromFiles    [][]merge.Param
-	)
+	res, err := merge.MergeParams(cfTemplate, paramFilesArray)
 
-	paramsFromTemplate, err = merge.GetParamsFromTemplate(string(cfTemplate))
-	if err != nil {
-		panic(err)
-	}
-	if len(paramFilesArray) > 0 {
-		paramsFromFiles, err = merge.GetParamsFromFiles(paramFilesArray)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	for name, valueInterface := range paramsFromTemplate {
-
-		pv = merge.GetTemplateParamValue(valueInterface)
-		if len(pv) > 0 {
-			paramValue = pv
-		}
-
-		pv = merge.GetParamValueFromFiles(paramsFromFiles, name)
-		if len(pv) > 0 {
-			paramValue = pv
-		}
-
-		pv = merge.GetParamValueFromEnv(name)
-		if len(pv) > 0 {
-			paramValue = pv
-		}
-
-		if len(paramValue) > 0 {
-			param := merge.Param{
-				ParameterKey:   name,
-				ParameterValue: paramValue,
-			}
-			res = append(res, param)
-		}
-	}
 	resj, err := json.Marshal(&res)
 	if err != nil {
 		panic(err)
