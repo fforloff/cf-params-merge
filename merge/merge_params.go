@@ -1,12 +1,12 @@
 package merge
 
-//MergedParams ...
+//MergedParams...
 func MergeParams(cft string, pfa []string) ([]Param, error) {
 
 	var (
 		res                []Param
-		paramValue         string
-		pv                 string
+		param              Param
+		ok                 bool
 		err                error
 		paramsFromTemplate map[string]interface{}
 		paramsFromFiles    [][]Param
@@ -14,37 +14,21 @@ func MergeParams(cft string, pfa []string) ([]Param, error) {
 
 	paramsFromTemplate, err = getParamsFromTemplate(string(cft))
 	if err != nil {
-		panic(err)
+		return res, err
 	}
 	if len(pfa) > 0 {
-		paramsFromFiles, err = getParamsFromFiles(pfa)
+		paramsFromFiles, err = loadParamsFromFiles(pfa)
 		if err != nil {
-			panic(err)
+			return res, err
 		}
 	}
 
-	for name, valueInterface := range paramsFromTemplate {
-
-		pv = getTemplateParamValue(valueInterface)
-		if len(pv) > 0 {
-			paramValue = pv
+	for name := range paramsFromTemplate {
+		if param, ok = getParamValueFromEnv(name); ok {
+			res = append(res, param)
+			continue
 		}
-
-		pv = getParamValueFromFiles(paramsFromFiles, name)
-		if len(pv) > 0 {
-			paramValue = pv
-		}
-
-		pv = getParamValueFromEnv(name)
-		if len(pv) > 0 {
-			paramValue = pv
-		}
-
-		if len(paramValue) > 0 {
-			param := Param{
-				ParameterKey:   name,
-				ParameterValue: paramValue,
-			}
+		if param, ok = getParamFromFiles(paramsFromFiles, name); ok {
 			res = append(res, param)
 		}
 	}

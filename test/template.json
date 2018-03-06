@@ -11,8 +11,10 @@
     },
     "Parameter3": {
       "Type": "Number",
-      "Default": 42,
-      "UsePreviousValue": true
+      "Default": 42
+    },
+    "Parameter4": {
+      "Type": "Number"
     }
   }
 }

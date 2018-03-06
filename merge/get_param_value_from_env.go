@@ -2,13 +2,16 @@ package merge
 
 import "os"
 
-func getParamValueFromEnv(n string) string {
+func getParamValueFromEnv(n string) (Param, bool) {
 	var (
-		v  string
 		ok bool
+		p  Param
+		v  string
 	)
 	if v, ok = os.LookupEnv(n); ok {
-		return v
+		p.ParameterKey = n
+		p.ParameterValue = v
+		return p, true
 	}
-	return ""
+	return p, false
 }
