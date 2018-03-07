@@ -2,5 +2,9 @@
     {
       "ParameterKey": "Parameter3",
       "ParameterValue": "44"
+    },
+    {
+      "ParameterKey": "Parameter4",
+      "UsePreviousValue": true
     }
   ]

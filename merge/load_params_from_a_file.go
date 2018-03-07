@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 )
 
-func getParamsFromFile(f string) ([]Param, error) {
+func loadParamsFromAFile(f string) ([]Param, error) {
 	raw, err := ioutil.ReadFile(f)
 	if err != nil {
 		return nil, err
