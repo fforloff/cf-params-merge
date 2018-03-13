@@ -36,11 +36,11 @@ func mergeRun(cmd *cobra.Command, args []string) {
 
 	res, err := merge.MergeParams(cfTemplate, paramFilesArray)
 
-	resj, err := json.Marshal(&res)
+	resj, err := json.MarshalIndent(&res, "", "  ")
 	if err != nil {
 		panic(err)
 	}
 
 	//fmt.Fprintf("%s", resj)
-	fmt.Printf("%s", resj)
+	fmt.Printf("%s\n", resj)
 }
